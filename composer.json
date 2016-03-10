@@ -1,0 +1,7 @@
+{
+    "require": {
+        "dibi/dibi": "^3.0",
+        "twbs/bootstrap": "^3.3",
+        "google/apiclient": "^1.1"
+    }
+}

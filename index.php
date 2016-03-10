@@ -1,66 +1,210 @@
 <?php
+$page = 'index'; ?>
+<?php require_once "function.php" ?>
+<?php header('Content-type: text/html; charset=utf-8'); ?>
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Zadanie č.3 | Michal Čech</title>
 
-function checkldapuser($username,$password,$ldap_server){
-    if($connect=@ldap_connect($ldap_server)){ // if connected to ldap server
+    <!-- Bootstrap -->
+    <link href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
+    <link href="assets/style.css" rel="stylesheet">
+    <link href="//cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" rel="stylesheet">
 
-        if (ldap_set_option($connect, LDAP_OPT_PROTOCOL_VERSION, 3)) {
-            echo "version 3<br>\n";
-        } else {
-            echo "version 2<br>\n";
-        }
-        echo "verification on '$ldap_server': ";
+    <link rel='shortcut icon' type='image/x-icon' href='favicon.ico'/>
 
-        // bind to ldap connection
-        if(($bind=@ldap_bind($connect)) == false){
-            print "bind:__FAILED__<br>\n";
-            return false;
-        }
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 
-        // search for user
-        if (($res_id = ldap_search( $connect,
-                "dc=stuba, dc=sk",
-                "uid=$username")) == false) {
-            print "failure: search in LDAP-tree failed<br>";
-            return false;
-        }
+    <![endif]-->
+</head>
+<body>
 
-        if (ldap_count_entries($connect, $res_id) != 1) {
-            print "failure: username $username found more than once<br>\n";
-            return false;
-        }
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-header">
+                <h1>Zadanie č.3 - AUTH
+                    <small>vypracoval Michal Čech</small>
+                </h1>
+            </div>
+        </div>
+    </div>
+    <?php
+    if (($flash = FlashMessage::getMessage()) && isset($flash['type']) && isset($flash['message'])): ?>
+        <?php if (isset($flash['type']) && $flash['type'] == "error"): ?>
+            <div class="alert alert-danger alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <strong>Error:</strong> <?php echo $flash['message']; ?>
+            </div>
+        <?php endif; ?>
+        <?php if (isset($flash['type']) && $flash['type'] == "success"): ?>
+            <div class="alert alert-success alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <strong>Success:</strong> <?php echo $flash['message']; ?>
+            </div>
+            <?php
+        endif;
+    endif;
+    if (MessagesList::hasMessages()):
+        foreach (MessagesList::getAll() as $error): ?>
+            <div class="alert alert-danger alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <strong>Error:</strong> <?php echo $error->getMessage(); ?>
+            </div>
+        <?php endforeach;
+    endif;
 
-        if (( $entry_id = ldap_first_entry($connect, $res_id))== false) {
-            print "failur: entry of searchresult couln't be fetched<br>\n";
-            return false;
-        }
+    $facade = new GoogleFacade();
 
-        if (( $user_dn = ldap_get_dn($connect, $entry_id)) == false) {
-            print "failure: user-dn coulnd't be fetched<br>\n";
-            return false;
-        }
+    $client = $facade->getClient();
 
-        /* Authentifizierung des User */
-        if (($link_id = ldap_bind($connect, $user_dn, $password)) == false) {
-            print "failure: username, password didn't match: $user_dn<br>\n";
-            return false;
-        }
-
-        return true;
-        @ldap_close($connect);
-    } else {                                  // no conection to ldap server
-        echo "no connection to '$ldap_server'<br>\n";
+    if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
+        $client->setAccessToken($_SESSION['access_token']);
+    } else {
+        $authUrl = $client->createAuthUrl();
     }
 
-    echo "failed: ".ldap_error($connect)."<BR>\n";
+    if (!isset($authUrl) || User::check()) :
 
-    @ldap_close($connect);
-    return(false);
+    $logged_user = User::getLoggedUser();
+    ?>
+    <div class="row">
+        <div class="col-sm-2 pull-right text-right">
+            <a href="action.php?method=logout" class="btn btn-warning">Logout</a>
+        </div>
+        <div class="col-sm-2 pull-right">
+            <a href="action.php?method=history" class="btn btn-success" data-toggle="modal" data-target="#modal">Login history</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            Hello <?php echo $logged_user->getFullName() ?>
+            <div
+        </div>
 
-}//end function checkldapuser
+        <?php else : ?>
+
+            <div class="row">
+                <div class="col-sm-2 col-sm-offset-1">
+                    <a class="btn btn-primary btn-block" data-toggle="modal"
+                       data-target="#edit_modal"
+                       href="action.php?method=registration">Registration</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-10 col-sm-offset-1">
+                    <hr>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-10 col-sm-offset-1">
+                    <div class="page-header">
+                        <h2>Login
+                            <small>by email & password</small>
+                        </h2>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-4">
+                            <form class="form form-horizontal" action="action.php?method=login" method="post">
+                                <div class="form-group">
+                                    <input type="email" value="" id="email" name="email" class="form-control"
+                                           placeholder="Email">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" value="" id="password" name="password" class="form-control"
+                                           placeholder="Password">
+                                </div>
+                                <div class="form-group">
+                                    <input type="submit" value="Login" class="pull-right btn btn-success">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <hr>
+            </div>
+            <div class="row">
+                <div class="col-sm-10 col-sm-offset-1">
+                    <div class="page-header">
+                        <h2>Login to LDAP
+                            <small>by AIS login & password</small>
+                        </h2>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-4">
+                            <form class="form form-horizontal" action="action.php?method=ldap" method="post">
+                                <div class="form-group">
+                                    <input type="text" value="" id="login" name="login" class="form-control"
+                                           placeholder="Login">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" value="" id="password" name="password" class="form-control"
+                                           placeholder="Password">
+                                </div>
+                                <div class="form-group">
+                                    <input type="submit" value="Login" class="pull-right btn btn-success">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-10 col-sm-offset-1">
+                    <div class="page-header">
+                        <h2>OAUTH login
+                            <small>by Google</small>
+                        </h2>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-4">
+                            <?php if(isset($authUrl)) : ?>
+                                <a class="btn btn-info btn-block" href='<?php echo $authUrl ?>'>Connect Me!</a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <hr>
+            </div>
+            <div class="row">
+                <p></p>
+            </div>
+        <?php endif; ?>
+    </div>
 
 
-if (checkldapuser('xcechm4', 'mojesuperheslo', 'ldap.stuba.sk')) { // IDecko namiesto xcechm4 neberie
-    echo "ACCESS GRANTED\n";
-} else {
-    echo "ACCESS DENIED\n";
-}
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('body').on('hidden.bs.modal', '.modal', function () {
+                $(this).removeData('bs.modal');
+            });
+        });
+
+    </script>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+</body>
+</html>
