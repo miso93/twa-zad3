@@ -26,6 +26,8 @@ $page = 'index'; ?>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 
     <![endif]-->
+
+    <script src="vendor/imsky/holder/holder.min.js"></script>
 </head>
 <body>
 
@@ -76,135 +78,171 @@ $page = 'index'; ?>
 
     if (!isset($authUrl) || User::check()) :
 
-    $logged_user = User::getLoggedUser();
-    ?>
-    <div class="row">
-        <div class="col-sm-2 pull-right text-right">
-            <a href="action.php?method=logout" class="btn btn-warning">Logout</a>
-        </div>
-        <div class="col-sm-2 pull-right">
-            <a href="action.php?method=history" class="btn btn-success" data-toggle="modal" data-target="#modal">Login history</a>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            Hello <?php echo $logged_user->getFullName() ?>
-            <div
+        $logged_user = User::getLoggedUser();
+        ?>
+        <div class="row">
+            <div class="col-sm-2 pull-right text-right">
+                <a href="action.php?method=logout" class="btn btn-warning btn-block">Logout</a>
+            </div>
+
+            <?php if ($logged_user->hasPassword()) : ?>
+
+                <div class="col-sm-2 pull-right">
+                    <a href="action.php?method=changePassword" class="btn btn-success btn-gray btn-block"
+                       data-toggle="modal" data-target="#modal">
+                        Change password
+                    </a>
+                </div>
+
+            <?php else : ?>
+
+                <div class="col-sm-2 pull-right">
+                    <a href="action.php?method=setPassword" class="btn btn-success btn-gray btn-block"
+                       data-toggle="modal"
+                       data-target="#modal">
+                        Set password
+                    </a>
+                </div>
+
+            <?php endif; ?>
+
+            <div class="col-sm-2 pull-right">
+                <a href="action.php?method=history" class="btn btn-success btn-gray btn-block" data-toggle="modal"
+                   data-target="#modal">Login history</a>
+            </div>
         </div>
 
-        <?php else : ?>
+        <div class="row">
+            <div class="col-sm-3">
+                <?php if ($logged_user->getPicture()): ?>
+                    <img src="<?php echo $logged_user->getPicture(); ?>" class="img-responsive img-circle"
+                         alt="<?php echo $logged_user->getFullName(); ?>">
+                <?php else: ?>
+                    <img data-src="holder.js/200x200/#fff:#000" class="img-responsive img-circle"
+                         alt="<?php echo $logged_user->getFullName(); ?>">
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-9">
+                <h2>
+                    Hello <?php echo $logged_user->getFullName(); ?> (<?php echo $logged_user->getEmail(); ?>)
+                </h2>
+            </div>
+        </div>
+    <?php else : ?>
 
-            <div class="row">
-                <div class="col-sm-2 col-sm-offset-1">
-                    <a class="btn btn-primary btn-block" data-toggle="modal"
-                       data-target="#edit_modal"
-                       href="action.php?method=registration">Registration</a>
-                </div>
+        <div class="row">
+            <div class="col-sm-2 col-sm-offset-1">
+                <a class="btn btn-primary btn-block" data-toggle="modal"
+                   data-target="#edit_modal"
+                   href="action.php?method=registration">Registration</a>
             </div>
-            <div class="row">
-                <div class="col-sm-10 col-sm-offset-1">
-                    <hr>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-10 col-sm-offset-1">
-                    <div class="page-header">
-                        <h2>Login
-                            <small>by email & password</small>
-                        </h2>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 col-md-offset-4">
-                            <form class="form form-horizontal" action="action.php?method=login" method="post">
-                                <div class="form-group">
-                                    <input type="email" value="" id="email" name="email" class="form-control"
-                                           placeholder="Email">
-                                </div>
-                                <div class="form-group">
-                                    <input type="password" value="" id="password" name="password" class="form-control"
-                                           placeholder="Password">
-                                </div>
-                                <div class="form-group">
-                                    <input type="submit" value="Login" class="pull-right btn btn-success">
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
+        </div>
+        <div class="row">
+            <div class="col-sm-10 col-sm-offset-1">
                 <hr>
             </div>
-            <div class="row">
-                <div class="col-sm-10 col-sm-offset-1">
-                    <div class="page-header">
-                        <h2>Login to LDAP
-                            <small>by AIS login & password</small>
-                        </h2>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 col-md-offset-4">
-                            <form class="form form-horizontal" action="action.php?method=ldap" method="post">
-                                <div class="form-group">
-                                    <input type="text" value="" id="login" name="login" class="form-control"
-                                           placeholder="Login">
-                                </div>
-                                <div class="form-group">
-                                    <input type="password" value="" id="password" name="password" class="form-control"
-                                           placeholder="Password">
-                                </div>
-                                <div class="form-group">
-                                    <input type="submit" value="Login" class="pull-right btn btn-success">
-                                </div>
-                            </form>
-                        </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-10 col-sm-offset-1">
+                <div class="page-header">
+                    <h2>Login
+                        <small>by email & password</small>
+                    </h2>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <form class="form form-horizontal" action="action.php?method=login" method="post">
+                            <div class="form-group">
+                                <input type="email" value="" id="email" name="email" class="form-control"
+                                       placeholder="Email">
+                            </div>
+                            <div class="form-group">
+                                <input type="password" value="" id="l_password" name="password" class="form-control"
+                                       placeholder="Password">
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Login" class="pull-right btn btn-success">
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-10 col-sm-offset-1">
-                    <div class="page-header">
-                        <h2>OAUTH login
-                            <small>by Google</small>
-                        </h2>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 col-md-offset-4">
-                            <?php if(isset($authUrl)) : ?>
-                                <a class="btn btn-info btn-block" href='<?php echo $authUrl ?>'>Connect Me!</a>
-                            <?php endif; ?>
-                        </div>
+        </div>
+        <div class="row">
+            <hr>
+        </div>
+        <div class="row">
+            <div class="col-sm-10 col-sm-offset-1">
+                <div class="page-header">
+                    <h2>Login to LDAP
+                        <small>by AIS login & password</small>
+                    </h2>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <form class="form form-horizontal" action="action.php?method=ldap" method="post">
+                            <div class="form-group">
+                                <input type="text" value="" id="login" name="login" class="form-control"
+                                       placeholder="Login">
+                            </div>
+                            <div class="form-group">
+                                <input type="password" value="" id="ldap_password" name="password" class="form-control"
+                                       placeholder="Password">
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Login" class="pull-right btn btn-success">
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <hr>
+        </div>
+        <div class="row">
+            <div class="col-sm-10 col-sm-offset-1">
+                <div class="page-header">
+                    <h2>OAUTH login
+                        <small>by Google</small>
+                    </h2>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <?php if (isset($authUrl)) : ?>
+                            <a class="btn btn-info btn-block" href='<?php echo $authUrl ?>'>Connect Me!</a>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
-            <div class="row">
-                <p></p>
-            </div>
-        <?php endif; ?>
-    </div>
+        </div>
+        <div class="row">
+            <hr>
+        </div>
+        <div class="row">
+            <p></p>
+        </div>
+    <?php endif; ?>
+</div>
 
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript">
-        $(function () {
-            $('body').on('hidden.bs.modal', '.modal', function () {
-                $(this).removeData('bs.modal');
-            });
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('body').on('hidden.bs.modal', '.modal', function () {
+            $(this).removeData('bs.modal');
         });
+    });
 
-    </script>
-    <div class="modal fade" id="modal" tabindex="-1" role="dialog"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content"></div>
-        </div>
+</script>
+<div class="modal fade" id="modal" tabindex="-1" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content"></div>
     </div>
+</div>
 </body>
 </html>

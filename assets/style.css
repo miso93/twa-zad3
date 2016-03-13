@@ -1,0 +1,10 @@
+.btn-gray {
+    background-color: #0f0f0f;
+    color: #fafafa;
+    border: 1px solid #cfcfcf;
+    margin-bottom: 20px;
+}
+.btn-gray:hover,
+.btn-gray:focus {
+    background-color: #303233;
+}

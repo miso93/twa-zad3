@@ -60,7 +60,9 @@ if (!User::exists($arr['email'])) {
 } else {
     User::update($arr);
 }
+
 User::login($arr['email'], $arr['type']);
+
 FlashMessage::putMessage('Successfully login by Google OAUTH with email '. $arr['email'], 'success');
 
 

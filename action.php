@@ -15,6 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         require_once "history_login.php";
     }
 
+    if($method == "changePassword"){
+        require_once "changePassword.php";
+    }
+
+    if($method == "setPassword"){
+        require_once "setPassword.php";
+    }
+
 } else {
     if ($method == "registration") {
         require_once "processRegistration.php";
@@ -26,6 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 
     if ($method == "ldap") {
         require_once "processLdapLogin.php";
+    }
+
+    if($method == "processChangePassword"){
+        require_once "processChangePassword.php";
+    }
+
+    if($method == "processSetPassword"){
+        require_once "processSetPassword.php";
     }
 }
 
